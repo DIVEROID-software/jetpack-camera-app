@@ -1,0 +1,31 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+    - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+    - name: Build Android Diving Computer with Gradle
+        env:
+          GITHUB_ACTOR: ${{ secrets.SECRET_ACTOR }}  # Inject the GitHub actor
+          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}  # Inject the GitHub token (GitHub Actions secret)
+        run: |
+          cd android
+          ./gradlew :core:camera:clean :core:camera:build :core:camera:publish :core:camera:low-light:clean :core:camera:low-light:build :core:camera:low-light:publish :core:common:clean :core:common:build :core:common:publish :core:model:clean :core:model:build :core:model:publish :data:media:clean :data:media:build :data:media:publish :data:settings:clean :data:settings:build :data:settings:publish
