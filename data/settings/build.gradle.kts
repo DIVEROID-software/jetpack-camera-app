@@ -126,7 +126,7 @@ publishing {
         create<MavenPublication>("stableRelease") {
             groupId = "com.diveroid"
             artifactId = "android-camerax-data-settings"
-            version = "0.0.2"
+            version = "0.0.3"
 
             afterEvaluate {
                 from(components["stableRelease"])
@@ -136,7 +136,7 @@ publishing {
 
     repositories {
         maven {
-            name = "GitHubPackages"
+            name = "GitHubPackagess"
             url = uri("https://maven.pkg.github.com/DIVEROID-software/jetpack-camera-app")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
