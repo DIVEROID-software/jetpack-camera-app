@@ -23,7 +23,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Android Ble with Gradle
+      - name: Build Android Camera X App with Gradle
         env:
           GITHUB_ACTOR: ${{ secrets.SECRET_ACTOR }}  # Inject the GitHub actor
           GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}  # Inject the GitHub token (GitHub Actions secret)
