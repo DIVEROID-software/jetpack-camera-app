@@ -136,7 +136,7 @@ publishing {
 
     repositories {
         maven {
-            name = "GitHubPackages"
+            name = "GitHubPackagess"
             url = uri("https://maven.pkg.github.com/DIVEROID-software/jetpack-camera-app")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
