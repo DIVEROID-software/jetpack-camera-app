@@ -23,7 +23,7 @@ plugins {
 
 android {
     namespace = "com.google.jetpackcamera.feature.postcapture"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
