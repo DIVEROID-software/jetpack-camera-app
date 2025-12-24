@@ -56,7 +56,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.diveroid"
             artifactId = "android-camerax-low-light"
-            version = "0.0.3-local"
+            version = libs.versions.publishVersion.get()
 
             afterEvaluate {
                 from(components["release"])

@@ -54,7 +54,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.diveroid"
             artifactId = "android-camerax-postprocess"
-            version = "0.0.3-local"
+            version = libs.versions.publishVersion.get()
 
             afterEvaluate {
                 from(components["release"])
