@@ -104,7 +104,7 @@ publishing {
         create<MavenPublication>("stableRelease") {
             groupId = "com.diveroid"
             artifactId = "android-camerax-data-media"
-            version = "0.0.3"
+            version = libs.versions.publishVersion.get()
 
             afterEvaluate {
                 from(components["stableRelease"])
