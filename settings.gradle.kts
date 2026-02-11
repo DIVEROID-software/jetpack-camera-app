@@ -21,6 +21,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -56,3 +59,4 @@ include(":core:model")
 include(":ui:uistate:postcapture")
 include(":ui:uistateadapter:postcapture")
 include(":core:camera:postprocess")
+include(":diveroid-android-camera")

@@ -107,7 +107,7 @@ const val UNLIMITED_VIDEO_DURATION = 0L
  * CameraX based implementation for [CameraSystem]
  */
 @ViewModelScoped
-class CameraXCameraSystem
+open class CameraXCameraSystem
 @Inject
 constructor(
     private val application: Application,
@@ -122,7 +122,7 @@ constructor(
     val imagePostProcessors:
     Map<ImagePostProcessorFeatureKey, @JvmSuppressWildcards Provider<ImagePostProcessor>>
 ) : CameraSystem {
-    private lateinit var cameraProvider: ProcessCameraProvider
+    protected lateinit var cameraProvider: ProcessCameraProvider
 
     private var imageCaptureUseCase: ImageCapture? = null
 

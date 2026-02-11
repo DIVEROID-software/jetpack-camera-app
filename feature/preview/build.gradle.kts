@@ -147,6 +147,8 @@ dependencies {
     implementation(project(":ui:uistate:capture"))
     implementation(project(":ui:uistateadapter:capture"))
 
+    api(project(":diveroid-android-camera"))
+
 }
 
 // Allow references to generated code

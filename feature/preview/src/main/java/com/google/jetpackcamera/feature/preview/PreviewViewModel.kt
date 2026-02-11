@@ -15,20 +15,28 @@
  */
 package com.google.jetpackcamera.feature.preview
 
+import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import androidx.camera.core.SurfaceRequest
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.tracing.Trace
 import androidx.tracing.traceAsync
+import com.diveroid.androidcamera.DiveroidCameraSystem
+import com.diveroid.androidcamera.DiveroidLocalSettingsRepository
 import com.google.jetpackcamera.core.camera.CameraState
 import com.google.jetpackcamera.core.camera.CameraSystem
 import com.google.jetpackcamera.core.camera.OnVideoRecordEvent
+import com.google.jetpackcamera.core.common.DefaultDispatcher
+import com.google.jetpackcamera.core.common.DefaultFilePathGenerator
 import com.google.jetpackcamera.core.common.DefaultSaveMode
+import com.google.jetpackcamera.core.common.FilePathGenerator
+import com.google.jetpackcamera.core.common.IODispatcher
 import com.google.jetpackcamera.core.common.traceFirstFramePreview
 import com.google.jetpackcamera.data.media.MediaDescriptor
 import com.google.jetpackcamera.data.media.MediaRepository
@@ -57,6 +65,7 @@ import com.google.jetpackcamera.model.StreamConfig
 import com.google.jetpackcamera.model.TestPattern
 import com.google.jetpackcamera.model.VideoCaptureEvent
 import com.google.jetpackcamera.settings.ConstraintsRepository
+import com.google.jetpackcamera.settings.SettableConstraintsRepository
 import com.google.jetpackcamera.settings.SettingsRepository
 import com.google.jetpackcamera.settings.model.CameraAppSettings
 import com.google.jetpackcamera.settings.model.CameraSystemConstraints
@@ -99,12 +108,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.LinkedList
 import javax.inject.Inject
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,6 +127,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 private const val TAG = "PreviewViewModel"
 private const val IMAGE_CAPTURE_TRACE = "JCA Image Capture"
@@ -125,13 +139,21 @@ private const val IMAGE_CAPTURE_TRACE = "JCA Image Capture"
  */
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
-    private val cameraSystem: CameraSystem,
+//    private val cameraSystem: CameraSystem,
     private val savedStateHandle: SavedStateHandle,
     @DefaultSaveMode private val defaultSaveMode: SaveMode,
-    private val settingsRepository: SettingsRepository,
+//    private val settingsRepository: SettingsRepository,
     private val constraintsRepository: ConstraintsRepository,
-    private val mediaRepository: MediaRepository
+    private val mediaRepository: MediaRepository,
+    private val application: Application,
+    @param:DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @param:IODispatcher private val iODispatcher: CoroutineDispatcher,
+    @DefaultFilePathGenerator private val filePathGenerator: FilePathGenerator,
+    private val settableconstraintsRepository: SettableConstraintsRepository,
 ) : ViewModel() {
+    private val settingsRepository = DiveroidLocalSettingsRepository(application)
+    private val cameraSystem: DiveroidCameraSystem = DiveroidCameraSystem(application, defaultDispatcher, iODispatcher, settableconstraintsRepository, filePathGenerator)
+
     private val saveMode: SaveMode = savedStateHandle.getRequestedSaveMode() ?: defaultSaveMode
     private val _captureUiState: MutableStateFlow<CaptureUiState> =
         MutableStateFlow(CaptureUiState.NotReady)
@@ -190,6 +212,15 @@ class PreviewViewModel @Inject constructor(
     }
 
     init {
+
+        viewModelScope.launch {
+            delay(2000)
+            val result =cameraSystem.getCameraZoomFactor()
+           result.forEach {
+               Log.d("CameraXCameraSystem", "getCameraZoomFactor: ${it.first} -- ${it.second}")
+           }
+        }
+
         viewModelScope.launch {
             launch {
                 var oldCameraAppSettings: CameraAppSettings? = null
@@ -746,6 +777,7 @@ class PreviewViewModel @Inject constructor(
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     fun startVideoRecording() {
         if (captureUiState.value is CaptureUiState.Ready &&
             (captureUiState.value as CaptureUiState.Ready).externalCaptureMode ==
@@ -768,7 +800,8 @@ class PreviewViewModel @Inject constructor(
             val saveMode = saveMode
             val (saveLocation, _) = nextSaveLocation(saveMode)
             try {
-                cameraSystem.startVideoRecording(saveLocation) {
+                cameraSystem.startVideoRecording(SaveLocation.Explicit(File("${application.getExternalFilesDir(null)!!.toUri()}",
+                    "demo.mp4").toUri())) {
                     var snackbarToShow: SnackbarData?
                     when (it) {
                         is OnVideoRecordEvent.OnVideoRecorded -> {
