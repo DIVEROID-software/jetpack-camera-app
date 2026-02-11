@@ -17,13 +17,17 @@
 package com.diveroid.androidcamera
 
 import android.hardware.camera2.CameraCharacteristics
+import android.os.Build
 import android.util.Log
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraInfo
 
 object CameraZoomInfoUtils {
+    @OptIn(ExperimentalCamera2Interop::class)
+    @RequiresApi(Build.VERSION_CODES.P)
     fun getCameraZoomFactor(cameraInfos: List<CameraInfo>) : List<Pair<String, Float>> {
         val zoomFactor : MutableList<Pair<String, Float>> = mutableListOf()
         val focalLens : MutableList<Pair<String, Float>> = mutableListOf()
